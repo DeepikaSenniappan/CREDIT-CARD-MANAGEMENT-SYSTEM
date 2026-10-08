@@ -1,0 +1,10 @@
+[run]
+source = banking,fastapi_app
+branch = True
+omit =
+    */migrations/*
+    */tests.py
+
+[report]
+fail_under = 50
+show_missing = True

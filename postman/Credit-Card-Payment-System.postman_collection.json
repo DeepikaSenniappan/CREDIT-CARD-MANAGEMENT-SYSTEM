@@ -1,0 +1,84 @@
+{
+  "info": {
+    "name": "Credit Card Payment System",
+    "description": "Django REST and FastAPI workflow. Set collection variables before use.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "django_url", "value": "http://127.0.0.1:8000" },
+    { "key": "payment_url", "value": "http://127.0.0.1:8001" },
+    { "key": "access_token", "value": "" },
+    { "key": "refresh_token", "value": "" },
+    { "key": "card_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"username\": \"sample-user\",\n  \"email\": \"sample@example.com\",\n  \"password\": \"Replace-With-A-Strong-Password-1!\"\n}" },
+        "url": "{{django_url}}/api/auth/register/"
+      }
+    },
+    {
+      "name": "Login",
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "const body = pm.response.json();",
+          "if (body.access) pm.collectionVariables.set('access_token', body.access);",
+          "if (body.refresh) pm.collectionVariables.set('refresh_token', body.refresh);"
+        ] }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"sample@example.com\",\n  \"password\": \"Replace-With-A-Strong-Password-1!\"\n}" },
+        "url": "{{django_url}}/api/auth/login/"
+      }
+    },
+    {
+      "name": "Add tokenized card",
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "const body = pm.response.json();",
+          "if (body.id) pm.collectionVariables.set('card_id', body.id);"
+        ] }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"provider_payment_method_id\": \"pm_replace_with_provider_token\",\n  \"brand\": \"Visa\",\n  \"last4\": \"4242\",\n  \"card_type\": \"CREDIT\",\n  \"expiry_month\": 12,\n  \"expiry_year\": 2030\n}" },
+        "url": "{{django_url}}/api/cards/"
+      }
+    },
+    {
+      "name": "Make payment",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"card_id\": \"{{card_id}}\",\n  \"amount\": \"25.50\",\n  \"currency\": \"USD\"\n}" },
+        "url": "{{payment_url}}/payments"
+      }
+    },
+    {
+      "name": "Transaction history",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+        "url": "{{django_url}}/api/transactions/?status=SUCCESS&min_amount=1.00"
+      }
+    },
+    {
+      "name": "Logout",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}" },
+        "url": "{{django_url}}/api/auth/logout/"
+      }
+    }
+  ]
+}
