@@ -1,0 +1,8 @@
+INFO:     127.0.0.1:49333 - "OPTIONS /payments HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57896 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57896 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49672 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49672 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57881 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50853 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59679 - "POST /payments HTTP/1.1" 201 Created

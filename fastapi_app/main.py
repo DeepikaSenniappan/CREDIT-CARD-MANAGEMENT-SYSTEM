@@ -1,6 +1,12 @@
 import os
+import sys
 from decimal import Decimal
+from pathlib import Path
 from uuid import UUID
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "creditcard_system.settings")
 
@@ -11,6 +17,7 @@ django.setup()
 from django.contrib.auth import get_user_model
 from django.db import transaction as db_transaction
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from rest_framework_simplejwt.exceptions import TokenError
@@ -20,6 +27,16 @@ from banking.models import Card, Transaction
 from banking.services import simulate_payment
 
 app = FastAPI(title="Credit Card Payment Processor", version="1.0.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 bearer_scheme = HTTPBearer(auto_error=False)
 
 
@@ -72,3 +89,9 @@ def make_payment(payload: PaymentRequest, user=Depends(authenticated_user)):
         id=payment.id, amount=payment.amount, currency=payment.currency,
         status=payment.status, failure_reason=payment.failure_reason,
     )
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="127.0.0.1", port=8001)
